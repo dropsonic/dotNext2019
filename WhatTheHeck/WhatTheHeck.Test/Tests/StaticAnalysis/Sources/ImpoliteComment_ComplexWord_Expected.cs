@@ -2,6 +2,6 @@
 {
 	class Bar
 	{
-		// What the FUCK is this?
+		// I hate hecking with legacy code
 	}
 }

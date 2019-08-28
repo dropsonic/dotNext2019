@@ -1,65 +1,75 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
-using System.Linq;
-using System.Threading;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Rename;
-using Microsoft.CodeAnalysis.Text;
 
 namespace WhatTheHeck.StaticAnalysis
 {
-	[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(WhatTheHeckCodeFixProvider)), Shared]
+	[ExportCodeFixProvider(LanguageNames.CSharp), Shared]
 	public sealed class WhatTheHeckCodeFixProvider : CodeFixProvider
 	{
-		public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(Descriptors.DN1000_WhatTheHeckComment.Id);
+		private const string FWordReplacement = "heck";
+
+		public override ImmutableArray<string> FixableDiagnosticIds { get; } = 
+			ImmutableArray.Create(Descriptors.DN1000_WhatTheHeckComment.Id);
 		
 		// See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
-		public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
+		public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
-		public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
+		public override async Task RegisterCodeFixesAsync(CodeFixContext context)
 		{
+			string title = nameof(Resources.DN1000Fix).GetLocalized().ToString();
+
 			var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+			
+			foreach (var diagnostic in context.Diagnostics)
+			{
+				var comment = root.FindTrivia(diagnostic.Location.SourceSpan.Start);
+				
+				if (comment.IsKind(SyntaxKind.SingleLineCommentTrivia) || comment.IsKind(SyntaxKind.MultiLineCommentTrivia))
+				{
+					context.RegisterCodeFix(CodeAction.Create(title, ct =>
+					{
+						if (FWordReplacement.Length != WhatTheHeckAnalyzer.FWord.Length)
+							throw new NotSupportedException();
 
-			// TODO: Replace the following code with your own analysis, generating a CodeAction for each fix to suggest
-			var diagnostic = context.Diagnostics.First();
-			var diagnosticSpan = diagnostic.Location.SourceSpan;
+						var newComment = SyntaxFactory.Comment(ReplaceFWord(comment.ToFullString()));
 
-			// Find the type declaration identified by the diagnostic.
-			var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().First();
-
-			// Register a code action that will invoke the fix.
-			//context.RegisterCodeFix(
-			//	CodeAction.Create(
-			//		title: title,
-			//		createChangedSolution: c => MakeUppercaseAsync(context.Document, declaration, c),
-			//		equivalenceKey: title),
-			//	diagnostic);
+						return Task.FromResult(
+							context.Document.WithSyntaxRoot(
+								root.ReplaceTrivia(comment, newComment)));
+					}), diagnostic);
+				}
+			}
+			
 		}
 
-		private async Task<Solution> MakeUppercaseAsync(Document document, TypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
+		private static string ReplaceFWord(string text)
 		{
-			// Compute new uppercase name.
-			var identifierToken = typeDecl.Identifier;
-			var newName = identifierToken.Text.ToUpperInvariant();
+			string word = WhatTheHeckAnalyzer.FWord.PadLeft(1);
+			char[] newText = text.ToCharArray();
+			text = text.PadLeft(1);
 
-			// Get the symbol representing the type to be renamed.
-			var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
-			var typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl, cancellationToken);
+			int index;
+			while ((index = text.IndexOf(word, StringComparison.OrdinalIgnoreCase)) >= 0)
+			{
+				for (int i = index + 1, j = 0; i < index + WhatTheHeckAnalyzer.FWord.Length; i++, j++)
+				{
+					if (char.IsUpper(text[i]))
+						newText[i - 1] = char.ToUpperInvariant(FWordReplacement[j]);
+					else if (char.IsLower(text[i]))
+						newText[i - 1] = char.ToLowerInvariant(FWordReplacement[j]);
+				}
 
-			// Produce a new solution that has all references to that type renamed, including the declaration.
-			var originalSolution = document.Project.Solution;
-			var optionSet = originalSolution.Workspace.Options;
-			var newSolution = await Renamer.RenameSymbolAsync(document.Project.Solution, typeSymbol, newName, optionSet, cancellationToken).ConfigureAwait(false);
+				text = new string(newText);
+			}
 
-			// Return the new solution with the now-uppercase type name.
-			return newSolution;
+			return text;
 		}
 	}
 }

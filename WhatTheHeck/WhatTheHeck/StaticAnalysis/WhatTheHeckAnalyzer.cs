@@ -10,9 +10,9 @@ namespace WhatTheHeck.StaticAnalysis
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]
 	public class WhatTheHeckAnalyzer : DiagnosticAnalyzer
 	{
-		private const string FWord = "fuck";
+		internal const string FWord = "fuck";
 
-		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
+		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
 			ImmutableArray.Create(Descriptors.DN1000_WhatTheHeckComment);
 
 		public override void Initialize(AnalysisContext context)
@@ -29,6 +29,7 @@ namespace WhatTheHeck.StaticAnalysis
 				.Where(t => (t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
 					&& ContainsFWord(t.ToFullString())))
 			{
+				var t = trivia.Token;
 				context.ReportDiagnostic(
 					Diagnostic.Create(Descriptors.DN1000_WhatTheHeckComment, trivia.GetLocation()));
 			}
