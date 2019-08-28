@@ -13,23 +13,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Rename;
 using Microsoft.CodeAnalysis.Text;
 
-namespace WhatTheHeck
+namespace WhatTheHeck.StaticAnalysis
 {
 	[ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(WhatTheHeckCodeFixProvider)), Shared]
-	public class WhatTheHeckCodeFixProvider : CodeFixProvider
+	public sealed class WhatTheHeckCodeFixProvider : CodeFixProvider
 	{
-		private const string title = "Make uppercase";
-
-		public sealed override ImmutableArray<string> FixableDiagnosticIds
-		{
-			get { return ImmutableArray.Create(WhatTheHeckAnalyzer.DiagnosticId); }
-		}
-
-		public sealed override FixAllProvider GetFixAllProvider()
-		{
-			// See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
-			return WellKnownFixAllProviders.BatchFixer;
-		}
+		public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(Descriptors.DN1000_WhatTheHeckComment.Id);
+		
+		// See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
+		public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
 		public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
 		{
@@ -43,12 +35,12 @@ namespace WhatTheHeck
 			var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().First();
 
 			// Register a code action that will invoke the fix.
-			context.RegisterCodeFix(
-				CodeAction.Create(
-					title: title,
-					createChangedSolution: c => MakeUppercaseAsync(context.Document, declaration, c),
-					equivalenceKey: title),
-				diagnostic);
+			//context.RegisterCodeFix(
+			//	CodeAction.Create(
+			//		title: title,
+			//		createChangedSolution: c => MakeUppercaseAsync(context.Document, declaration, c),
+			//		equivalenceKey: title),
+			//	diagnostic);
 		}
 
 		private async Task<Solution> MakeUppercaseAsync(Document document, TypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
