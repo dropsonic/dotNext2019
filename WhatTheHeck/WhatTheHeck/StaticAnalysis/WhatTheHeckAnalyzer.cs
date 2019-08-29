@@ -17,7 +17,7 @@ namespace WhatTheHeck.StaticAnalysis
 
 		public override void Initialize(AnalysisContext context)
 		{
-			//context.EnableConcurrentExecution();
+			context.EnableConcurrentExecution();
 			context.RegisterSyntaxTreeAction(AnalyzeSyntaxTree);
 		}
 

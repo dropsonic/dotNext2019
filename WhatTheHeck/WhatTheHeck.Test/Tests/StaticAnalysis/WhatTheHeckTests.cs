@@ -15,7 +15,8 @@ namespace WhatTheHeck.Test.Tests.StaticAnalysis
 
 		[Theory]
 		[EmbeddedFileData("PoliteComment.cs")]
-		public Task PoliteComment_ShouldNotShowDiagnostic(string actual) => VerifyCSharpDiagnosticAsync(actual);
+		public Task PoliteComment_ShouldNotShowDiagnostic(string actual) => 
+			VerifyCSharpDiagnosticAsync(actual);
 
 		[Theory]
 		[EmbeddedFileData("ImpoliteComment_StandaloneWord.cs")]
@@ -30,10 +31,12 @@ namespace WhatTheHeck.Test.Tests.StaticAnalysis
 
 		[Theory]
 		[EmbeddedFileData("ImpoliteComment_StandaloneWord.cs", "ImpoliteComment_StandaloneWord_Expected.cs")]
-		public Task ImpoliteComment_StandaloneWord_ShouldFixIt(string actual, string expected) => VerifyCSharpFixAsync(actual, expected);
+		public Task ImpoliteComment_StandaloneWord_ShouldFixIt(string actual, string expected) => 
+			VerifyCSharpFixAsync(actual, expected);
 
 		[Theory]
 		[EmbeddedFileData("ImpoliteComment_ComplexWord.cs", "ImpoliteComment_ComplexWord_Expected.cs")]
-		public Task ImpoliteComment_ComplexWord_ShouldFixIt(string actual, string expected) => VerifyCSharpFixAsync(actual, expected);
+		public Task ImpoliteComment_ComplexWord_ShouldFixIt(string actual, string expected) => 
+			VerifyCSharpFixAsync(actual, expected);
 	}
 }
