@@ -10,7 +10,10 @@ namespace WhatTheHeck.StaticAnalysis
 {
 	internal class SuppressionManager
 	{
-		private const string SuppressionFileExtension = ".suppression";
+		public const string SuppressionFileExtension = ".suppression";
+		public const string SuppressionCommentFormat = "// Rehecker disable once {0}";
+		public const string PropertyKey = "suppression";
+
 		private static readonly Regex CommentRegex = new Regex(@"Rehecker disable once (DN\d{4})", RegexOptions.Compiled);
 
 		private readonly ImmutableHashSet<string> _suppressions;
@@ -26,7 +29,7 @@ namespace WhatTheHeck.StaticAnalysis
 			{
 				foreach (var line in file.GetText().Lines)
 				{
-					set.Add(line.Text.ToString());
+					set.Add(line.Text.ToString(line.Span));
 				}
 			}
 

@@ -42,8 +42,9 @@ namespace WhatTheHeck.StaticAnalysis
 					&& !suppressionManager.IsSuppressed(Descriptors.DN1000_WhatTheHeckComment, t)))
 			{
 				// Добавляем диагностику
+				var properties = ImmutableDictionary<string, string>.Empty.Add(SuppressionManager.PropertyKey, trivia.ToFullString());
 				context.ReportDiagnostic(
-					Diagnostic.Create(Descriptors.DN1000_WhatTheHeckComment, trivia.GetLocation()));
+					Diagnostic.Create(Descriptors.DN1000_WhatTheHeckComment, trivia.GetLocation(), properties));
 			}
 		}
 
