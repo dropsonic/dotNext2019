@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -7,29 +7,36 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace WhatTheHeck.StaticAnalysis
 {
+	// Помечаем класс как Roslyn Analyzer для языка C#
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]
 	public class WhatTheHeckAnalyzer : DiagnosticAnalyzer
 	{
 		internal const string FWord = "fuck";
 
+		// Список всех диагностик, о которых может сообщать данный анализатор
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
 			ImmutableArray.Create(Descriptors.DN1000_WhatTheHeckComment);
 
 		public override void Initialize(AnalysisContext context)
 		{
 			context.EnableConcurrentExecution();
+			// Подписываемся на окончание парсинга документа
 			context.RegisterSyntaxTreeAction(AnalyzeSyntaxTree);
 		}
 
 		private static void AnalyzeSyntaxTree(SyntaxTreeAnalysisContext context)
 		{
+			// Получаем корневой узел синтаксического дерева
 			var root = context.Tree.GetRoot(context.CancellationToken);
 
-			foreach (var trivia in root.DescendantTrivia()
+			// Ищем все SyntaxTrivia в документе...
+			foreach (SyntaxTrivia trivia in root.DescendantTrivia()
+			// ...которые являются однострочными или многострочными комментариями...
 				.Where(t => (t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
+			// ...и содержат неприличное слово :)
 					&& ContainsFWord(t.ToFullString())))
 			{
-				var t = trivia.Token;
+				// Добавляем диагностику
 				context.ReportDiagnostic(
 					Diagnostic.Create(Descriptors.DN1000_WhatTheHeckComment, trivia.GetLocation()));
 			}

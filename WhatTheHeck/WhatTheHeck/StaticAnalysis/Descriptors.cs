@@ -8,6 +8,7 @@ namespace WhatTheHeck.StaticAnalysis
 		Default,
 	}
 
+	// Класс, содержащий экземпляры дескрипторов для всех диагностик
 	public static class Descriptors
 	{
 		private static readonly ConcurrentDictionary<Category, string> _categoryMapping = new ConcurrentDictionary<Category, string>();
