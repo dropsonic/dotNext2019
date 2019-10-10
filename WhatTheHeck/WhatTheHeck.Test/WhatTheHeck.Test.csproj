@@ -14,11 +14,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Tests\StaticAnalysis\Sources\WhatTheHeck.suppression" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_Expected.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\PoliteComment.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\Sources\WhatTheHeck.suppression" />
   </ItemGroup>
 
   <ItemGroup>

@@ -43,7 +43,7 @@ namespace WhatTheHeck.StaticAnalysis
 						return Task.FromResult(
 							context.Document.WithSyntaxRoot(
 								root.ReplaceTrivia(comment, newComment)));
-					}), diagnostic);
+					}, title), diagnostic);
 				}
 			}
 			

@@ -32,6 +32,12 @@ namespace WhatTheHeck.Test.Tests.StaticAnalysis
 		public Task ImpoliteComment_ComplexWord_ShouldShowDiagnostic(string actual) =>
 			VerifyCSharpDiagnosticAsync(actual, Descriptors.DN1000_WhatTheHeckComment.CreateFor(line: 5, column: 3));
 
+		// Проверка отсутствия срабатывания при наличии исключения в suppression-файле
+		[Theory]
+		[EmbeddedFileData("ImpoliteComment_StandaloneWord.cs", "WhatTheHeck.suppression")]
+		public Task ImpoliteComment_StandaloneWord_ShouldNotShowDiagnostic_BecauseItIsSuppressed(string actual, string suppressionFile) => 
+			VerifyCSharpDiagnosticWithSuppressionFileAsync(actual, suppressionFile);
+
 
 		// Проверка, что code fix корректно исправляет найденную ошибку
 		[Theory]

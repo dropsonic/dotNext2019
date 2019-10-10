@@ -45,6 +45,11 @@ namespace WhatTheHeck.Test.Verification
 			return VerifyDiagnosticsAsync(new[] { source }, LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), expected);
 		}
 
+		protected Task VerifyCSharpDiagnosticWithSuppressionFileAsync(string source, string suppressionFile, params DiagnosticResult[] expected)
+		{
+			return VerifyDiagnosticsAsync(new[] { source }, LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), expected, suppressionFile);
+		}
+
 		/// <summary>
 		/// Called to test a C# DiagnosticAnalyzer when applied on the single inputted string as a source
 		/// Note: input a DiagnosticResult for each Diagnostic expected
@@ -157,9 +162,10 @@ namespace WhatTheHeck.Test.Verification
 		/// <param name="language">The language of the classes represented by the source strings</param>
 		/// <param name="analyzer">The analyzer to be run on the source code</param>
 		/// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the sources</param>
-		private async Task VerifyDiagnosticsAsync(string[] sources, string language, DiagnosticAnalyzer analyzer, params DiagnosticResult[] expected)
+		private async Task VerifyDiagnosticsAsync(string[] sources, string language, DiagnosticAnalyzer analyzer, DiagnosticResult[] expected,
+			string suppressionFile = null)
 		{
-			var diagnostics = await GetSortedDiagnosticsAsync(sources, language, analyzer).ConfigureAwait(false);
+			var diagnostics = await GetSortedDiagnosticsAsync(sources, language, analyzer, suppressionFile).ConfigureAwait(false);
 			VerifyDiagnosticResults(diagnostics, analyzer, expected);
 		}
 
@@ -340,6 +346,7 @@ namespace WhatTheHeck.Test.Verification
 		#endregion
 
 		#region Static helpers
+
 		/// <summary>
 		/// Given classes in the form of strings, their language, and an IDiagnosticAnlayzer to apply to it, return the diagnostics found in the string after converting it to a document.
 		/// </summary>
@@ -347,10 +354,10 @@ namespace WhatTheHeck.Test.Verification
 		/// <param name="language">The language the source classes are in</param>
 		/// <param name="analyzer">The analyzer to be run on the sources</param>
 		/// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
-		private static Task<Diagnostic[]> GetSortedDiagnosticsAsync(string[] sources, string language, 
-			DiagnosticAnalyzer analyzer)
+		private static Task<Diagnostic[]> GetSortedDiagnosticsAsync(string[] sources, string language,
+			DiagnosticAnalyzer analyzer, string suppressionFile = null)
 		{
-			return GetSortedDiagnosticsFromDocumentsAsync(analyzer, VerificationHelper.GetDocuments(sources, language));
+			return GetSortedDiagnosticsFromDocumentsAsync(analyzer, VerificationHelper.GetDocuments(sources, language, suppressionFile));
 		}
 
 		/// <summary>
@@ -372,7 +379,7 @@ namespace WhatTheHeck.Test.Verification
 			foreach (var project in projects)
 			{
 				var compilation = await project.GetCompilationAsync().ConfigureAwait(false);
-				var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzer));
+				var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzer), project.AnalyzerOptions);
 				var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().ConfigureAwait(false);
 				foreach (var diag in diags)
 				{
