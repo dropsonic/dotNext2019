@@ -120,9 +120,12 @@ namespace WhatTheHeck.Test.Verification
 				count++;
 			}
 
-			var additionalDocumentId = DocumentId.CreateNewId(projectId, debugName: "Suppression File");
-			solution = solution.AddAdditionalDocument(additionalDocumentId, "Test.suppression",
-				SourceText.From(suppressionFile));
+			if (suppressionFile != null)
+			{
+				var additionalDocumentId = DocumentId.CreateNewId(projectId, debugName: "Suppression File");
+				solution = solution.AddAdditionalDocument(additionalDocumentId, "Test.suppression",
+					SourceText.From(suppressionFile));
+			}
 
 			return solution.GetProject(projectId);
 		}

@@ -10,6 +10,7 @@
     <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
     <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord.cs" />
     <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_Expected.cs" />
+    <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_SuppressedWithComment.cs" />
     <Compile Remove="Tests\StaticAnalysis\Sources\PoliteComment.cs" />
   </ItemGroup>
 
@@ -20,6 +21,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_SuppressedWithComment.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_Expected.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\PoliteComment.cs" />

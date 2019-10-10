@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Text;
 
 namespace WhatTheHeck.StaticAnalysis
 {
@@ -31,8 +29,8 @@ namespace WhatTheHeck.StaticAnalysis
 			// Получаем корневой узел синтаксического дерева
 			var root = context.Tree.GetRoot(context.CancellationToken);
 
-			// Читаем все "подавления" диагностики из suppression-файлов
-			var suppressions = GetSuppressions(context.Options.AdditionalFiles);
+			// Создаём SuppressionManager
+			var suppressionManager = new SuppressionManager(context.Options);
 
 			// Ищем все SyntaxTrivia в документе...
 			foreach (SyntaxTrivia trivia in root.DescendantTrivia()
@@ -40,8 +38,8 @@ namespace WhatTheHeck.StaticAnalysis
 				.Where(t => (t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
 			// ...содержат неприличное слово...
 					&& ContainsFWord(t.ToFullString())
-			// ...и не находятся в suppression-файле
-					&& !suppressions.Contains(t.ToFullString())))
+			// ...и не подавлены каким-либо образом (в suppression-файле или с помощью специального комментария)
+					&& !suppressionManager.IsSuppressed(Descriptors.DN1000_WhatTheHeckComment, t)))
 			{
 				// Добавляем диагностику
 				context.ReportDiagnostic(

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Immutable;
 using System.Composition;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -18,7 +17,6 @@ namespace WhatTheHeck.StaticAnalysis
 		public override ImmutableArray<string> FixableDiagnosticIds { get; } = 
 			ImmutableArray.Create(Descriptors.DN1000_WhatTheHeckComment.Id);
 		
-		// See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
 		public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
 		public override async Task RegisterCodeFixesAsync(CodeFixContext context)

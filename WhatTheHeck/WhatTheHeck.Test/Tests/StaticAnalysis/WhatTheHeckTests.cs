@@ -35,9 +35,14 @@ namespace WhatTheHeck.Test.Tests.StaticAnalysis
 		// Проверка отсутствия срабатывания при наличии исключения в suppression-файле
 		[Theory]
 		[EmbeddedFileData("ImpoliteComment_StandaloneWord.cs", "WhatTheHeck.suppression")]
-		public Task ImpoliteComment_StandaloneWord_ShouldNotShowDiagnostic_BecauseItIsSuppressed(string actual, string suppressionFile) => 
+		public Task ImpoliteComment_StandaloneWord_ShouldNotShowDiagnostic_BecauseItIsSuppressedInFile(string actual, string suppressionFile) => 
 			VerifyCSharpDiagnosticWithSuppressionFileAsync(actual, suppressionFile);
 
+		// Проверка отсутствия срабатывания при наличии suppression-комментария
+		[Theory]
+		[EmbeddedFileData("ImpoliteComment_StandaloneWord_SuppressedWithComment.cs")]
+		public Task ImpoliteComment_StandaloneWord_ShouldNotShowDiagnostic_BecauseItIsSuppressedWithComment(string actual) => 
+			VerifyCSharpDiagnosticAsync(actual);
 
 		// Проверка, что code fix корректно исправляет найденную ошибку
 		[Theory]
