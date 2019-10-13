@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Composition.Hosting;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNext.IntelliSense;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Host;
+using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Simplification;
 using Microsoft.CodeAnalysis.Text;
 
@@ -64,11 +68,18 @@ namespace DotNext.Test.Verification
 			return CreateProject(new[] { source }, language, externalCode).Documents.First();
 		}
 
-		public static Document CreateCSharpDocument(string source, params string[] additionalSources)
+		public static Document CreateCSharpDocument(params string[] sources)
 		{
-			var sources = new List<string>(additionalSources) { source };
-			return CreateProject(sources.ToArray()).Documents.Last();
+			return CreateProject(sources).Documents.First();
 		}
+
+		public static Document CreateCSharpDocument<TService>(MetadataReference[] references, params string[] sources)
+		{
+			return CreateProject(sources, serviceType: typeof(TService), additionalReferences: references)
+				.Documents.First();
+		}
+
+		private object locker = new object();
 
 		/// <summary>
 		/// Create a project using the inputted strings as sources.
@@ -77,14 +88,18 @@ namespace DotNext.Test.Verification
 		/// <param name="language">The language the source code is in</param>
 		/// <param name="externalCode">The source codes for new memory compilation. The goal of the external code is to simulate the behaviour of the extenal assembly without source code.</param>
 		/// <returns>A Project created out of the Documents created from the source strings</returns>
-		private static Project CreateProject(string[] sources, string language = LanguageNames.CSharp, string[] externalCode = null, string suppressionFile = null)
+		private static Project CreateProject(string[] sources, string language = LanguageNames.CSharp, string[] externalCode = null, string suppressionFile = null,
+			Type serviceType = null, MetadataReference[] additionalReferences = null)
 		{
 			string fileNamePrefix = DefaultFilePathPrefix;
 			string fileExt = language == LanguageNames.CSharp ? CSharpDefaultFileExt : VisualBasicDefaultExt;
 
 			var projectId = ProjectId.CreateNewId(debugName: TestProjectName);
 
-			var workspace = new AdhocWorkspace();
+			var workspace = serviceType == null
+				? new AdhocWorkspace()
+				: new AdhocWorkspace(CreateHostServices(serviceType));
+
 			workspace.Options = workspace.Options.WithChangedOption(FormattingOptions.UseTabs, LanguageNames.CSharp, true)
 												 .WithChangedOption(FormattingOptions.SmartIndent, LanguageNames.CSharp, FormattingOptions.IndentStyle.Smart)
 												 .WithChangedOption(FormattingOptions.TabSize, LanguageNames.CSharp, 4)
@@ -96,6 +111,9 @@ namespace DotNext.Test.Verification
 									.AddMetadataReference(projectId, SystemCoreReference)
 									.AddMetadataReference(projectId, CSharpSymbolsReference)
 									.AddMetadataReference(projectId, CodeAnalysisReference);
+
+			if (additionalReferences != null)
+				solution = solution.AddMetadataReferences(projectId, additionalReferences);
 
 			if (externalCode != null && externalCode.Length > 0)
 			{
@@ -127,6 +145,15 @@ namespace DotNext.Test.Verification
 			}
 
 			return solution.GetProject(projectId);
+		}
+
+		private static HostServices CreateHostServices(Type additionalService)
+		{
+			var container = new ContainerConfiguration()
+				.WithAssemblies(MefHostServices.DefaultAssemblies)
+				.WithPart(additionalService)
+				.CreateContainer();
+			return MefHostServices.Create(container);
 		}
 
 		/// <summary>
@@ -205,6 +232,13 @@ namespace DotNext.Test.Verification
 			}
 
 			return diagnostics;
+		}
+
+		public static async Task<int> GetPositionAsync(Document document, int line, int column)
+		{
+			var text = await document.GetTextAsync().ConfigureAwait(false);
+			var textLine = text.Lines[line - 1];
+			return textLine.Start + column - 1;
 		}
 
 		/// <summary>

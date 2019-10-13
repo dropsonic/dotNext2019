@@ -1,11 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Tests\IntelliSense\Sources\DapperQuery.cs" />
+    <Compile Remove="Tests\IntelliSense\Sources\NoDapper.cs" />
+    <Compile Remove="Tests\IntelliSense\Sources\Post.cs" />
+    <Compile Remove="Tests\IntelliSense\Sources\User.cs" />
     <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord.cs" />
     <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
     <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord.cs" />
@@ -19,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Tests\IntelliSense\Sources\DapperQuery.cs" />
+    <EmbeddedResource Include="Tests\IntelliSense\Sources\NoDapper.cs" />
+    <EmbeddedResource Include="Tests\IntelliSense\Sources\Post.cs" />
+    <EmbeddedResource Include="Tests\IntelliSense\Sources\User.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_SuppressedWithComment.cs" />
@@ -29,12 +37,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.4" />
     <PackageReference Include="FluentAssertions" Version="5.8.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.4">
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="2.10.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.10.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="2.10.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
