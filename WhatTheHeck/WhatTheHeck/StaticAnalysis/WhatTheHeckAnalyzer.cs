@@ -48,26 +48,8 @@ namespace WhatTheHeck.StaticAnalysis
 			}
 		}
 
-
 		private static bool ContainsFWord(string text) => !String.IsNullOrEmpty(text) 
 		                                                  && (text.StartsWith(FWord, StringComparison.OrdinalIgnoreCase) 
 		                                                      || text.IndexOf(FWord.PadLeft(1), StringComparison.OrdinalIgnoreCase) >= 0);
-
-		private static ImmutableHashSet<string> GetSuppressions(ImmutableArray<AdditionalText> additionalFiles)
-		{
-			var set = ImmutableHashSet<string>.Empty.ToBuilder();
-
-			// Читаем все строки из всех suppression-файлов
-			foreach (var file in additionalFiles
-				.Where(f => !String.IsNullOrEmpty(f.Path) && f.Path.EndsWith(".suppression", StringComparison.OrdinalIgnoreCase)))
-			{
-				foreach (var line in file.GetText().Lines)
-				{
-					set.Add(line.Text.ToString());
-				}
-			}
-
-			return set.ToImmutable();
-		}
 	}
 }
