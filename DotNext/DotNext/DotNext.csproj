@@ -20,6 +20,7 @@
     <Copyright>Copyright</Copyright>
     <PackageTags>DotNext, analyzers</PackageTags>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -123,4 +123,7 @@
   <data name="DN1000Title" xml:space="preserve">
     <value>F-words are not allowed in the comments</value>
   </data>
+  <data name="DN1001Title" xml:space="preserve">
+    <value>A System.IDisposable.Dispose method should not throw an exception</value>
+  </data>
 </root>

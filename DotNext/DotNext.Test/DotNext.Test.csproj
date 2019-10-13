@@ -10,6 +10,8 @@
     <Compile Remove="Tests\IntelliSense\Sources\NoDapper.cs" />
     <Compile Remove="Tests\IntelliSense\Sources\Post.cs" />
     <Compile Remove="Tests\IntelliSense\Sources\User.cs" />
+    <Compile Remove="Tests\StaticAnalysis\ThrowInDispose\Sources\ThrowDirectly.cs" />
+    <Compile Remove="Tests\StaticAnalysis\ThrowInDispose\Sources\ThrowIndirectly.cs" />
     <Compile Remove="Tests\StaticAnalysis\WhatTheHeck\Sources\ImpoliteComment_ComplexWord.cs" />
     <Compile Remove="Tests\StaticAnalysis\WhatTheHeck\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
     <Compile Remove="Tests\StaticAnalysis\WhatTheHeck\Sources\ImpoliteComment_StandaloneWord.cs" />
@@ -27,6 +29,8 @@
     <EmbeddedResource Include="Tests\IntelliSense\Sources\NoDapper.cs" />
     <EmbeddedResource Include="Tests\IntelliSense\Sources\Post.cs" />
     <EmbeddedResource Include="Tests\IntelliSense\Sources\User.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\ThrowInDispose\Sources\ThrowIndirectly.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\ThrowInDispose\Sources\ThrowDirectly.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\WhatTheHeck\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\WhatTheHeck\Sources\ImpoliteComment_ComplexWord.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\WhatTheHeck\Sources\ImpoliteComment_StandaloneWord_SuppressedWithComment.cs" />

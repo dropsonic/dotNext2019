@@ -24,5 +24,8 @@ namespace DotNext.StaticAnalysis
 
 		public static DiagnosticDescriptor DN1000_WhatTheHeckComment { get; } = 
 			Rule("DN1000", nameof(Resources.DN1000Title).GetLocalized(), Category.Default, DiagnosticSeverity.Warning);
+
+		public static DiagnosticDescriptor DN1001_ThrowInDispose { get; } = 
+			Rule("DN1001", nameof(Resources.DN1001Title).GetLocalized(), Category.Default, DiagnosticSeverity.Warning);
 	}
 }
