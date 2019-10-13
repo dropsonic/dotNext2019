@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord.cs" />
+    <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
+    <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord.cs" />
+    <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_Expected.cs" />
+    <Compile Remove="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_SuppressedWithComment.cs" />
+    <Compile Remove="Tests\StaticAnalysis\Sources\PoliteComment.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Tests\StaticAnalysis\Sources\WhatTheHeck.suppression" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_ComplexWord.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_SuppressedWithComment.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord_Expected.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\Sources\ImpoliteComment_StandaloneWord.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\Sources\PoliteComment.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\Sources\WhatTheHeck.suppression" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.8.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.9.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotNext\DotNext.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Verification\" />
+  </ItemGroup>
+
+</Project>
