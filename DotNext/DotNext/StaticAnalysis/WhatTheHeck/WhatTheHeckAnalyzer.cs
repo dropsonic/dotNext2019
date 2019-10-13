@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace DotNext.StaticAnalysis
+namespace DotNext.StaticAnalysis.WhatTheHeck
 {
 	// Помечаем класс как Roslyn Analyzer для языка C#
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]

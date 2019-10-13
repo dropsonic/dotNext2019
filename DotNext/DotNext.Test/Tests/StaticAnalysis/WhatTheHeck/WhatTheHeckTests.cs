@@ -1,12 +1,13 @@
 ﻿using System.Threading.Tasks;
 using DotNext.StaticAnalysis;
+using DotNext.StaticAnalysis.WhatTheHeck;
 using DotNext.Test.Helpers;
 using DotNext.Test.Verification;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Xunit;
 
-namespace DotNext.Test.Tests.StaticAnalysis
+namespace DotNext.Test.Tests.StaticAnalysis.WhatTheHeck
 {
 	public class WhatTheHeckTests : CodeFixVerifier
 	{

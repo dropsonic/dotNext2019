@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace DotNext.StaticAnalysis
+namespace DotNext.StaticAnalysis.WhatTheHeck
 {
 	[ExportCodeFixProvider(LanguageNames.CSharp), Shared]
 	public sealed class WhatTheHeckCodeFixProvider : CodeFixProvider
