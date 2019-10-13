@@ -78,9 +78,7 @@ namespace DotNext.Test.Verification
 			return CreateProject(sources, serviceType: typeof(TService), additionalReferences: references)
 				.Documents.First();
 		}
-
-		private object locker = new object();
-
+		
 		/// <summary>
 		/// Create a project using the inputted strings as sources.
 		/// </summary>

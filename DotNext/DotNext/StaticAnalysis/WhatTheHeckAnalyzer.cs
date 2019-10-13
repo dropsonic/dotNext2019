@@ -20,6 +20,8 @@ namespace DotNext.StaticAnalysis
 		public override void Initialize(AnalysisContext context)
 		{
 			context.EnableConcurrentExecution();
+			context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+
 			// Подписываемся на окончание парсинга документа
 			context.RegisterSyntaxTreeAction(AnalyzeSyntaxTree);
 		}

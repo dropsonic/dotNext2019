@@ -14,7 +14,7 @@ namespace DotNext.Test.Tests.IntelliSense
 {
 	public class DapperCompletionProviderTests
     {
-		[Theory]
+		[Theory(Skip = "IntelliSense tests require disables parallelization")]
 		[EmbeddedFileData("NoDapper.cs")]
         public async Task NotADapperCall_ShouldNotShowAnyCustomItems(string source)
         {
@@ -26,7 +26,7 @@ namespace DotNext.Test.Tests.IntelliSense
 	        actual.Should().BeNull("because it is a completion inside non-Dapper call");
         }
 
-	    [Theory]
+	    [Theory(Skip = "IntelliSense tests require disables parallelization")]
 	    [IntelliSenseText("")]
 	    public async Task EmptyQuery_ShouldShowSelectSuggestion(int position, params string[] sourceFiles)
 	    {
@@ -38,7 +38,7 @@ namespace DotNext.Test.Tests.IntelliSense
 		    actual.Items.Should().HaveCount(1);
 	    }
 
-	    [Theory]
+	    [Theory(Skip = "IntelliSense tests require disables parallelization")]
 	    [IntelliSenseText("SELECT ")]
 	    public async Task AfterSelect_ShouldShowSelectionSuggestion(int position, params string[] sourceFiles)
 	    {
