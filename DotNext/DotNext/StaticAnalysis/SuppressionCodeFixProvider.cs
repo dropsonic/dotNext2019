@@ -34,6 +34,8 @@ namespace DotNext.StaticAnalysis
 		private static readonly ImmutableArray<string> _fixableDiagnosticIds;
 		public override ImmutableArray<string> FixableDiagnosticIds => _fixableDiagnosticIds;
 
+		public override FixAllProvider GetFixAllProvider() => null;
+
 		public override Task RegisterCodeFixesAsync(CodeFixContext context)
 		{
 			// Для каждой найденной диагностики добавляем два code fix'а:
