@@ -32,43 +32,27 @@ namespace DotNext.StaticAnalysis
 	// ReSharper disable once InheritdocConsiderUsage
 	public abstract class NestedInvocationWalker : CSharpSyntaxWalker
 	{
-		private const int MaxDepth = 100; // to avoid circular dependencies
-
+		private const int MaxDepth = 100; // для борьбы с circular dependencies
 		private readonly Compilation _compilation;
-		
 		private readonly Dictionary<SyntaxTree, SemanticModel> _semanticModels = new Dictionary<SyntaxTree, SemanticModel>();
-
 		private readonly ISet<(SyntaxNode, DiagnosticDescriptor)> _reportedDiagnostics = new HashSet<(SyntaxNode, DiagnosticDescriptor)>();
+		private readonly Stack<SyntaxNode> _nodesStack = new Stack<SyntaxNode>();
+		private readonly HashSet<IMethodSymbol> _methodsInStack = new HashSet<IMethodSymbol>();
 
-        /// <summary>
-        /// Cancellation token
-        /// </summary>
         protected CancellationToken CancellationToken { get; }
-
-        /// <summary>
-        /// Syntax node in the original tree that is being analyzed.
-        /// Typically it is the node on which a diagnostic should be reported.
-        /// </summary>
+		
+        // Синтаксическая нода в оригинальном дереве, с которого начался анализ.
+        // Обычно это нода, на которой и нужно показывать диагностику.
         protected SyntaxNode OriginalNode { get; private set; }
 
-		private readonly Stack<SyntaxNode> _nodesStack = new Stack<SyntaxNode>();
-        private readonly HashSet<IMethodSymbol> _methodsInStack = new HashSet<IMethodSymbol>();
-
-		/// <summary>
-		/// Constructor of the class.
-		/// </summary>
-		/// <param name="compilation">Compilation.</param>
-		/// <param name="cancellationToken">Cancellation token.</param>
+		
 		protected NestedInvocationWalker(Compilation compilation, CancellationToken cancellationToken)
 		{
 			_compilation = compilation;
             CancellationToken = cancellationToken;
 		}
 
-		protected void ThrowIfCancellationRequested()
-		{
-            CancellationToken.ThrowIfCancellationRequested();
-		}
+		protected void ThrowIfCancellationRequested() => CancellationToken.ThrowIfCancellationRequested();
 
 		/// <summary>
 		/// Returns a symbol for an invocation expression, or, 
