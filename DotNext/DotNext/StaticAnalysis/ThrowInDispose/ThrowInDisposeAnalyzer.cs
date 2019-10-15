@@ -41,11 +41,14 @@ namespace DotNext.StaticAnalysis.ThrowInDispose
 		//{
 		//	context.RegisterCompilationStartAction(compilationStartContext =>
 		//	{
+		//		// Вместо использования Operation API, подписываемся на символы типа "метод"
 		//		compilationStartContext.RegisterSymbolAction(symbolContext =>
 		//		{
+		//			// Проверяем, что мы находимся внутри метода IDisposable.Dispose
 		//			if (symbolContext.Symbol is IMethodSymbol methodSymbol
-		//			    && methodSymbol.IsDisposeImplementation(symbolContext.Compilation))
+		//				&& methodSymbol.IsDisposeImplementation(symbolContext.Compilation))
 		//			{
+		//				// Получаем синтаксическую ноду и запускаем визитор на её содержимое
 		//				var methodSyntax = methodSymbol.GetSyntax() as CSharpSyntaxNode;
 		//				methodSyntax?.Accept(new ThrowWalker(symbolContext,
 		//					Descriptors.DN1001_ThrowInDispose));
