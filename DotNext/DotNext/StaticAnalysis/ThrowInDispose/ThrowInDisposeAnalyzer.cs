@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Net.Http;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
