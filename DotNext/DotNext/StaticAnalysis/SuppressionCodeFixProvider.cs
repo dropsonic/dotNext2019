@@ -68,7 +68,8 @@ namespace DotNext.StaticAnalysis
 				{
 					// Есть открытый баг от 2015 года, что Roslyn не проставляет Build Action = AdditionalFiles
 					// https://github.com/dotnet/roslyn/issues/4655
-					solution = project.Solution.AddAdditionalDocument(DocumentId.CreateNewId(project.Id, debugName: "Suppression File"),
+					solution = project.Solution.AddAdditionalDocument(
+						DocumentId.CreateNewId(project.Id, debugName: "Suppression File"),
 						name: project.Name + SuppressionManager.SuppressionFileExtension,
 						text: diagnostic.Properties[SuppressionManager.PropertyKey]);
 				}
@@ -76,7 +77,10 @@ namespace DotNext.StaticAnalysis
 				else
 				{
 					SourceText text = await suppressionDoc.GetTextAsync(ct).ConfigureAwait(false);
-					string newText = text + Environment.NewLine + diagnostic.Properties[SuppressionManager.PropertyKey];
+					string newText = text 
+					                 + Environment.NewLine 
+					                 + diagnostic.Properties[SuppressionManager.PropertyKey];
+
 					solution = project.Solution
 						.WithAdditionalDocumentText(suppressionDoc.Id, SourceText.From(newText));
 				}
