@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DotNext
 {
 	[ApiController]
-	[RoutePrefix("foo")]
+	[Route("foo")]
 	public class FooController : ControllerBase
 	{
-		[HttpGet, Route]
+		[HttpGet]
 		public IEnumerable<Foo> Get() => Enumerable.Empty<Foo>();
 
 		[HttpGet, Route("{id}")]

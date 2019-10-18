@@ -12,12 +12,22 @@ namespace DotNext.StaticAnalysis.Controller
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]
 	public class ControllerAnalyzer : DiagnosticAnalyzer
 	{
-		private readonly ImmutableArray<IControllerAnalyzer> _innerAnalyzers = ImmutableArray.Create<IControllerAnalyzer>(
-			new FooControllerAnalyzer());
+		private readonly ImmutableArray<IControllerAnalyzer> _innerAnalyzers;
 
 		// Список всех диагностик, о которых может сообщать данный анализатор
-		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-			ImmutableArray<DiagnosticDescriptor>.Empty;
+		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
+
+		public ControllerAnalyzer()
+			: this(new ControllerActionDuplicateAnalyzer())
+		{
+		}
+
+		// Конструктор для unit-тестов (чтобы тестировать каждый внутренний анализатор по-отдельности)
+		public ControllerAnalyzer(params IControllerAnalyzer[] innerAnalyzers)
+		{
+			_innerAnalyzers = ImmutableArray.Create(innerAnalyzers);
+			SupportedDiagnostics = ImmutableArray.CreateRange(innerAnalyzers.SelectMany(a => a.SupportedDiagnostics));
+		}
 
 		public override void Initialize(AnalysisContext context)
 		{
@@ -56,7 +66,7 @@ namespace DotNext.StaticAnalysis.Controller
 			var controllerRoute = symbol.GetAttributes().FirstOrDefault(a => a.AttributeClass.Equals(WellKnownTypes.RouteAttribute(compilation)));
 			if (controllerRoute != null)
 			{
-				var prefix = controllerRoute.ConstructorArguments[0].Values
+				var prefix = controllerRoute.ConstructorArguments
 					.FirstOrDefault(a => a.Type.SpecialType == SpecialType.System_String);
 				model = model.WithRoutePrefix(prefix.Value as string);
 			}
@@ -77,7 +87,7 @@ namespace DotNext.StaticAnalysis.Controller
 						httpMethod = HttpMethod.Post;
 					else if (attr.AttributeClass.Equals(WellKnownTypes.RouteAttribute(compilation)))
 					{
-						route = attr.ConstructorArguments[0].Values
+						route = attr.ConstructorArguments
 							.FirstOrDefault(a => a.Type.SpecialType == SpecialType.System_String).Value as string;
 					}
 				}
@@ -87,64 +97,6 @@ namespace DotNext.StaticAnalysis.Controller
 			}
 
 			return model.WithActions(actions.ToImmutable());
-		}
-	}
-
-	public interface IControllerAnalyzer
-	{
-		void Analyze(SymbolAnalysisContext context, ControllerModel model);
-	}
-
-	public class FooControllerAnalyzer : IControllerAnalyzer
-	{
-		public void Analyze(SymbolAnalysisContext context, ControllerModel model)
-		{
-			
-		}
-	}
-
-	public class ControllerAction
-	{
-		public ControllerAction(HttpMethod method, string route, IMethodSymbol symbol)
-		{
-			Method = method;
-			Route = route;
-			Symbol = symbol;
-		}
-
-		public HttpMethod Method { get; }
-		public string Route { get; }
-		public IMethodSymbol Symbol { get; }
-	}
-
-	public class ControllerModel
-	{
-		public ControllerModel() { }
-
-		public ControllerModel(string routePrefix, INamedTypeSymbol symbol, ImmutableArray<ControllerAction> actions)
-		{
-			RoutePrefix = routePrefix;
-			Symbol = symbol;
-			Actions = actions;
-		}
-
-		public string RoutePrefix { get; }
-		public INamedTypeSymbol Symbol { get; }
-		public ImmutableArray<ControllerAction> Actions { get; }
-
-		public ControllerModel WithRoutePrefix(string prefix)
-		{
-			return new ControllerModel(prefix, Symbol, Actions);
-		}
-
-		public ControllerModel WithSymbol(INamedTypeSymbol symbol)
-		{
-			return new ControllerModel(RoutePrefix, symbol, Actions);
-		}
-
-		public ControllerModel WithActions(ImmutableArray<ControllerAction> actions)
-		{
-			return new ControllerModel(RoutePrefix, Symbol, actions);
 		}
 	}
 }

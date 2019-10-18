@@ -10,6 +10,8 @@
     <Compile Remove="Tests\IntelliSense\Sources\NoDapper.cs" />
     <Compile Remove="Tests\IntelliSense\Sources\Post.cs" />
     <Compile Remove="Tests\IntelliSense\Sources\User.cs" />
+    <Compile Remove="Tests\StaticAnalysis\ControllerActionDuplicate\Sources\Duplicates.cs" />
+    <Compile Remove="Tests\StaticAnalysis\ControllerActionDuplicate\Sources\NoDuplicates.cs" />
     <Compile Remove="Tests\StaticAnalysis\ThrowInDispose\Sources\ThrowDirectly.cs" />
     <Compile Remove="Tests\StaticAnalysis\ThrowInDispose\Sources\ThrowIndirectly.cs" />
     <Compile Remove="Tests\StaticAnalysis\WhatTheHeck\Sources\ImpoliteComment_ComplexWord.cs" />
@@ -29,6 +31,8 @@
     <EmbeddedResource Include="Tests\IntelliSense\Sources\NoDapper.cs" />
     <EmbeddedResource Include="Tests\IntelliSense\Sources\Post.cs" />
     <EmbeddedResource Include="Tests\IntelliSense\Sources\User.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\ControllerActionDuplicate\Sources\Duplicates.cs" />
+    <EmbeddedResource Include="Tests\StaticAnalysis\ControllerActionDuplicate\Sources\NoDuplicates.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\ThrowInDispose\Sources\ThrowIndirectly.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\ThrowInDispose\Sources\ThrowDirectly.cs" />
     <EmbeddedResource Include="Tests\StaticAnalysis\WhatTheHeck\Sources\ImpoliteComment_ComplexWord_Expected.cs" />
@@ -43,6 +47,8 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.4" />
     <PackageReference Include="FluentAssertions" Version="5.8.0" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

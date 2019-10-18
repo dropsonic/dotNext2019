@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Composition.Hosting;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +25,10 @@ namespace DotNext.Test.Verification
 		private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
 		private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
 		private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
+		private static readonly MetadataReference NetStandardReference = MetadataReference.CreateFromFile(Assembly.Load("netstandard, Version=2.0.0.0").Location);
+		private static readonly MetadataReference SystemRuntimeReference = MetadataReference.CreateFromFile(Assembly.Load("System.Runtime, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a").Location);
+		private static readonly MetadataReference AspNetCoreReference = MetadataReference.CreateFromFile(typeof(Microsoft.AspNetCore.WebHost).Assembly.Location);
+		private static readonly MetadataReference AspNetCoreMvcReference = MetadataReference.CreateFromFile(typeof(Microsoft.AspNetCore.Mvc.RouteAttribute).Assembly.Location);
 
 		internal static string DefaultFilePathPrefix = "Test";
 		internal static string CSharpDefaultFileExt = "cs";
@@ -108,7 +113,11 @@ namespace DotNext.Test.Verification
 									.AddMetadataReference(projectId, CorlibReference)
 									.AddMetadataReference(projectId, SystemCoreReference)
 									.AddMetadataReference(projectId, CSharpSymbolsReference)
-									.AddMetadataReference(projectId, CodeAnalysisReference);
+									.AddMetadataReference(projectId, CodeAnalysisReference)
+									.AddMetadataReference(projectId, NetStandardReference)
+									.AddMetadataReference(projectId, SystemRuntimeReference)
+									.AddMetadataReference(projectId, AspNetCoreReference)
+									.AddMetadataReference(projectId, AspNetCoreMvcReference);
 
 			if (additionalReferences != null)
 				solution = solution.AddMetadataReferences(projectId, additionalReferences);

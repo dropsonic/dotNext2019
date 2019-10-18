@@ -126,4 +126,7 @@
   <data name="DN1001Title" xml:space="preserve">
     <value>A System.IDisposable.Dispose method should not throw an exception</value>
   </data>
+  <data name="DN1002Title" xml:space="preserve">
+    <value>Controller action with the same HTTP method and route already exists</value>
+  </data>
 </root>

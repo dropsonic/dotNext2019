@@ -17,9 +17,9 @@ namespace DotNext.StaticAnalysis
 			compilation.GetTypeByMetadataName("Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute");
 
 		public static INamedTypeSymbol HttpGetAttribute(Compilation compilation) =>
-			compilation.GetTypeByMetadataName("Microsoft.AspNetCore.Mvc.Routing.HttpGetAttribute");
+			compilation.GetTypeByMetadataName("Microsoft.AspNetCore.Mvc.HttpGetAttribute");
 
-		public static INamedTypeSymbol HttpGetAttribute(Compilation compilation) =>
-			compilation.GetTypeByMetadataName("Microsoft.AspNetCore.Mvc.Routing.HttpGetAttribute");
+		public static INamedTypeSymbol HttpPostAttribute(Compilation compilation) =>
+			compilation.GetTypeByMetadataName("Microsoft.AspNetCore.Mvc.HttpPostAttribute");
 	}
 }

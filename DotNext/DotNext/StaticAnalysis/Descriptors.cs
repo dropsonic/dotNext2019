@@ -27,5 +27,8 @@ namespace DotNext.StaticAnalysis
 
 		public static DiagnosticDescriptor DN1001_ThrowInDispose { get; } = 
 			Rule("DN1001", nameof(Resources.DN1001Title).GetLocalized(), Category.Default, DiagnosticSeverity.Warning);
+
+		public static DiagnosticDescriptor DN1002_DuplicateControllerAction { get; } = 
+			Rule("DN1002", nameof(Resources.DN1002Title).GetLocalized(), Category.Default, DiagnosticSeverity.Error);
 	}
 }

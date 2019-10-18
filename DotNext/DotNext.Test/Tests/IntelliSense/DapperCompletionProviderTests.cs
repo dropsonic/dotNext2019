@@ -50,16 +50,11 @@ namespace DotNext.Test.Tests.IntelliSense
 		    actual.Items.Should().HaveCount(1);
 	    }
 
-
-	    private static readonly MetadataReference NetStandard = MetadataReference.CreateFromFile(Assembly.Load("netstandard, Version=2.0.0.0").Location);
-	    private static readonly MetadataReference SystemRuntimeReference = MetadataReference.CreateFromFile(Assembly.Load("System.Runtime, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a").Location);
 	    private static readonly MetadataReference SystemDataCommon = MetadataReference.CreateFromFile(Assembly.Load("System.Data.Common, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a").Location);
 	    private static readonly MetadataReference DapperReference = MetadataReference.CreateFromFile(typeof(Dapper.SqlMapper).Assembly.Location);
 
 	    private static readonly MetadataReference[] References = new[]
 	    {
-		    NetStandard,
-			SystemRuntimeReference,
 			SystemDataCommon,
 			DapperReference,
 	    };

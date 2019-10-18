@@ -87,5 +87,14 @@ namespace DotNext {
                 return ResourceManager.GetString("DN1001Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Controller action with the same HTTP method and route already exists.
+        /// </summary>
+        internal static string DN1002Title {
+            get {
+                return ResourceManager.GetString("DN1002Title", resourceCulture);
+            }
+        }
     }
 }
