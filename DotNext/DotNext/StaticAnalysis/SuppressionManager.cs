@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,11 +15,14 @@ namespace DotNext.StaticAnalysis
 		public const string SuppressionCommentFormat = "// Rehecker disable once {0}";
 		public const string PropertyKey = "suppression";
 
+		private static readonly ConditionalWeakTable<AnalyzerOptions, SuppressionManager> _instances = 
+			new ConditionalWeakTable<AnalyzerOptions, SuppressionManager>();
+
 		private static readonly Regex CommentRegex = new Regex(@"Rehecker disable once (DN\d{4})", RegexOptions.Compiled);
 
 		private readonly ImmutableHashSet<string> _suppressions;
 
-		public SuppressionManager(AnalyzerOptions analyzerOptions)
+		private SuppressionManager(AnalyzerOptions analyzerOptions)
 		{
 			var set = ImmutableHashSet<string>.Empty.ToBuilder();
 
@@ -58,6 +62,15 @@ namespace DotNext.StaticAnalysis
 			}
 
 			return false;
+		}
+
+		// Возвращаем существующий SuppressionManager из кэша или создаём новый
+		public static SuppressionManager Get(AnalyzerOptions options)
+		{
+			if (!_instances.TryGetValue(options, out var instance))
+				instance = _instances.GetValue(options, o => new SuppressionManager(o));
+
+			return instance;
 		}
 	}
 }

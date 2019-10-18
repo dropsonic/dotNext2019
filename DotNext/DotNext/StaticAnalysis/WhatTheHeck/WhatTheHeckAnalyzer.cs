@@ -30,22 +30,18 @@ namespace DotNext.StaticAnalysis.WhatTheHeck
 		{
 			// Получаем корневой узел синтаксического дерева
 			var root = context.Tree.GetRoot(context.CancellationToken);
-
-			// Создаём SuppressionManager
-			var suppressionManager = new SuppressionManager(context.Options);
-
+			
 			// Ищем все SyntaxTrivia в документе...
 			foreach (SyntaxTrivia trivia in root.DescendantTrivia()
 			// ...которые являются однострочными или многострочными комментариями...
 				.Where(t => (t.IsKind(SyntaxKind.SingleLineCommentTrivia) || t.IsKind(SyntaxKind.MultiLineCommentTrivia))
-			// ...содержат неприличное слово...
-					&& ContainsFWord(t.ToFullString())
-			// ...и не подавлены каким-либо образом (в suppression-файле или с помощью специального комментария)
-					&& !suppressionManager.IsSuppressed(Descriptors.DN1000_WhatTheHeckComment, t)))
+			// ...содержат неприличное слово
+					&& ContainsFWord(t.ToFullString())))
 			{
 				// Добавляем диагностику
-				var properties = ImmutableDictionary<string, string>.Empty.Add(SuppressionManager.PropertyKey, trivia.ToFullString());
-				context.ReportDiagnostic(
+				var properties = ImmutableDictionary<string, string>.Empty.Add(
+					SuppressionManager.PropertyKey, trivia.ToFullString());
+				context.ReportDiagnosticWithSuppressionCheck(
 					Diagnostic.Create(Descriptors.DN1000_WhatTheHeckComment, trivia.GetLocation(), properties));
 			}
 		}
