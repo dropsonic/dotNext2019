@@ -62,6 +62,8 @@ namespace DotNext.StaticAnalysis
 					.FirstOrDefault(d => !String.IsNullOrEmpty(d.FilePath)
 					                     && d.FilePath.EndsWith(SuppressionManager.SuppressionFileExtension));
 
+				var text = SuppressionManager.Get(project.AnalyzerOptions).ToText();
+
 				Solution solution;
 				// Если файла нет, то создаём его
 				if (suppressionDoc == null)
@@ -76,13 +78,8 @@ namespace DotNext.StaticAnalysis
 				// Если файл уже есть, дописываем в конец новую строчку и обновляем solution
 				else
 				{
-					SourceText text = await suppressionDoc.GetTextAsync(ct).ConfigureAwait(false);
-					string newText = text 
-					                 + Environment.NewLine 
-					                 + diagnostic.Properties[SuppressionManager.PropertyKey];
-
 					solution = project.Solution
-						.WithAdditionalDocumentText(suppressionDoc.Id, SourceText.From(newText));
+						.WithAdditionalDocumentText(suppressionDoc.Id, text);
 				}
 			
 				return solution;
