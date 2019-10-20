@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
 
 namespace DotNext.StaticAnalysis
 {
@@ -54,7 +52,7 @@ namespace DotNext.StaticAnalysis
 		{
 			string title = $"Suppress {diagnostic.Id} in suppression file";
 
-			context.RegisterCodeFix(CodeAction.Create(title, async ct =>
+			context.RegisterCodeFix(CodeAction.Create(title, ct =>
 			{
 				// Пытаемся найти suppression-файл внутри проекта
 				var project = context.Document.Project;
@@ -62,7 +60,9 @@ namespace DotNext.StaticAnalysis
 					.FirstOrDefault(d => !String.IsNullOrEmpty(d.FilePath)
 					                     && d.FilePath.EndsWith(SuppressionManager.SuppressionFileExtension));
 
-				var text = SuppressionManager.Get(project.AnalyzerOptions).ToText();
+				var text = SuppressionManager.Get(project.AnalyzerOptions)
+					.AddSuppression(diagnostic)
+					.ToText();
 
 				Solution solution;
 				// Если файла нет, то создаём его
@@ -73,7 +73,7 @@ namespace DotNext.StaticAnalysis
 					solution = project.Solution.AddAdditionalDocument(
 						DocumentId.CreateNewId(project.Id, debugName: "Suppression File"),
 						name: project.Name + SuppressionManager.SuppressionFileExtension,
-						text: diagnostic.Properties[SuppressionManager.PropertyKey]);
+						text: text);
 				}
 				// Если файл уже есть, дописываем в конец новую строчку и обновляем solution
 				else
@@ -82,7 +82,7 @@ namespace DotNext.StaticAnalysis
 						.WithAdditionalDocumentText(suppressionDoc.Id, text);
 				}
 			
-				return solution;
+				return Task.FromResult(solution);
 			}, title), diagnostic);
 		}
 
@@ -90,37 +90,13 @@ namespace DotNext.StaticAnalysis
 		{
 			string title = $"Suppress {diagnostic.Id} with a comment";
 
-			context.RegisterCodeFix(CodeAction.Create(title, async ct =>
+			context.RegisterCodeFix(CodeAction.Create(title, ct =>
 			{
-				// Находим токен, к которому привязан комментарий
-				var root = await context.Document.GetSyntaxRootAsync(ct).ConfigureAwait(false);
-				var token = root.FindToken(context.Span.Start);
+				var suppressionManager = SuppressionManager.Get(
+					context.Document.Project.AnalyzerOptions);
 
-				// Создаём suppression-комментарий
-				var suppressionTrivia = SyntaxFactory.Comment(
-					String.Format(SuppressionManager.SuppressionCommentFormat, diagnostic.Id));
-
-				// Вставляем его перед оригинальным комментарием с F-word
-				string text = diagnostic.Properties[SuppressionManager.PropertyKey];
-				SyntaxTrivia whitespaceTrivia = SyntaxFactory.Whitespace("");
-
-				foreach (var trivia in token.LeadingTrivia)
-				{
-					if (trivia.IsKind(SyntaxKind.WhitespaceTrivia))
-						whitespaceTrivia = trivia;
-					if (trivia.ToFullString() == text)
-						break;
-				}
-
-				var newToken = token
-					.WithLeadingTrivia(token.LeadingTrivia
-						.Insert(0, SyntaxFactory.EndOfLine(Environment.NewLine))
-						.Insert(0, suppressionTrivia)
-						.Insert(0, whitespaceTrivia));
-				
-				var newRoot = root.ReplaceToken(token, newToken);
-				return context.Document.WithSyntaxRoot(newRoot);
-
+				return suppressionManager.AddSuppressionCommentAsync(
+					context.Document, diagnostic);
 			}, title), diagnostic);
 		}
 	}

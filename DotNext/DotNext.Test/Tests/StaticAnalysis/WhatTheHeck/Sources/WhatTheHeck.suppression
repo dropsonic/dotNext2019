@@ -1,1 +1,7 @@
-﻿// What the FUCK is this?
+﻿<?xml version="1.0" encoding="utf-8"?>
+<suppressions>
+  <suppressDiagnostic id="DN1000">
+    <context>Bar</context>
+    <target>// What the FUCK is this?</target>
+  </suppressDiagnostic>
+</suppressions>

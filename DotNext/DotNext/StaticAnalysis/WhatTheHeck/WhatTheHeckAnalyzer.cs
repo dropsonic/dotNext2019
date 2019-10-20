@@ -39,10 +39,8 @@ namespace DotNext.StaticAnalysis.WhatTheHeck
 					&& ContainsFWord(t.ToFullString())))
 			{
 				// Добавляем диагностику
-				var properties = ImmutableDictionary<string, string>.Empty.Add(
-					SuppressionManager.PropertyKey, trivia.ToFullString());
 				context.ReportDiagnosticWithSuppressionCheck(
-					Diagnostic.Create(Descriptors.DN1000_WhatTheHeckComment, trivia.GetLocation(), properties));
+					Diagnostic.Create(Descriptors.DN1000_WhatTheHeckComment, trivia.GetLocation()));
 			}
 		}
 
