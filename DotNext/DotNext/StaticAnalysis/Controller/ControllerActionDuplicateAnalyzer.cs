@@ -18,6 +18,7 @@ namespace DotNext.StaticAnalysis.Controller
 			{
 				if (group.Count() > 1)
 				{
+					// На каждый метод-дубликат добавляем диагностику
 					foreach (var action in group)
 					{
 						context.ReportDiagnostic(
