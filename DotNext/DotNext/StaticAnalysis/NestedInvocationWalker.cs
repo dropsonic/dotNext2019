@@ -8,28 +8,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DotNext.StaticAnalysis
 {
-	/// <summary>
-	/// Syntax walker that follows method invocations, property getters, etc.,
-	/// and analyzes corresponding symbols in a recursive manner.
-	/// </summary>
-	/// <remarks>
-	/// Please note that it doesn't analyze symbols which don't have any source code available.
-	/// </remarks>
-	/// <example>
-	///	<code title="Example">
-	/// string descr = SomeHelper.GetDescription(); // this code is being analyzed
-	/// ...
-	/// // In some other file or even in a different assembly
-	/// public static class SomeHelper
-	/// {
-	///		public static void GetDescription()
-	///		{
-	///			var graph = new PXGraph(); // this code will be analyzed too
-	///		}
-	/// }
-	///	</code>
-	/// </example>
-	// ReSharper disable once InheritdocConsiderUsage
 	public abstract class NestedInvocationWalker : CSharpSyntaxWalker
 	{
 		private const int MaxDepth = 100; // для борьбы с circular dependencies
@@ -54,10 +32,8 @@ namespace DotNext.StaticAnalysis
 
 		protected void ThrowIfCancellationRequested() => CancellationToken.ThrowIfCancellationRequested();
 
-		/// <summary>
-		/// Returns a symbol for an invocation expression, or, 
-		/// if the exact symbol cannot be found, returns the first candidate.
-		/// </summary>
+		// Возвращает семантическую информацию (symbol) для expression
+		// (например, вызова метода)
 		protected virtual T GetSymbol<T>(ExpressionSyntax node)
 			where T : class, ISymbol
 		{
@@ -94,17 +70,6 @@ namespace DotNext.StaticAnalysis
 			return semanticModel;
 		}
 
-		/// <summary>
-		/// Reports a diagnostic for the provided descriptor on the original syntax node from which recursive analysis started.
-		/// This method must be used for all diagnostic reporting within the walker
-		/// because it does diagnostic deduplication and determine the right syntax node to perform diagnostic reporting.
-		/// </summary>
-		/// <param name="reportDiagnostic">Action that reports a diagnostic in the current context (e.g., <code>SymbolAnalysisContext.ReportDiagnostic</code>)</param>
-		/// <param name="diagnosticDescriptor">Diagnostic descriptor</param>
-		/// <param name="node">Current syntax node that is being analyzed. Diagnostic will be reported on the original node.</param>
-		/// <param name="messageArgs">Arguments to the message of the diagnostic</param>
-		/// <remarks>This method takes a report diagnostic method as a parameter because it is different for each analyzer type 
-		/// (<code>SymbolAnalysisContext.ReportDiagnostic</code>, <code>SyntaxNodeAnalysisContext.ReportDiagnostic</code>, etc.)</remarks>
 		protected virtual void ReportDiagnostic(Action<Diagnostic> reportDiagnostic, DiagnosticDescriptor diagnosticDescriptor,
 												SyntaxNode node, params object[] messageArgs)
 		{
