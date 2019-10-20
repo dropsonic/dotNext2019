@@ -3,8 +3,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+// ReSharper disable UnusedMember.Global
+// ReSharper disable ImpureMethodCallOnReadonlyValueField
 
 namespace DotNext.StaticAnalysis.Controller
 {
@@ -31,15 +32,20 @@ namespace DotNext.StaticAnalysis.Controller
 
 		public override void Initialize(AnalysisContext context)
 		{
+			context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+			context.EnableConcurrentExecution();
+
 			context.RegisterCompilationStartAction(compilationStartContext =>
 			{
 				compilationStartContext.RegisterSymbolAction(symbolContext =>
 				{
+					// Создаём одну общую модель для всех анализаторов
 					var symbol = (INamedTypeSymbol) symbolContext.Symbol;
 					var model = CreateSemanticModel(symbol, symbolContext.Compilation);
 
 					if (model != null)
 					{
+						// Запускаем все "внутренние" анализаторы в параллель
 						var parallelOptions = new ParallelOptions
 						{
 							CancellationToken = symbolContext.CancellationToken
@@ -57,13 +63,16 @@ namespace DotNext.StaticAnalysis.Controller
 
 		private ControllerModel CreateSemanticModel(INamedTypeSymbol symbol, Compilation compilation)
 		{
+			// Проверяем, что это класс-наследник ControllerBase
 			var controllerBase = WellKnownTypes.ControllerBase(compilation);
 			if (controllerBase == null || !symbol.InheritsFrom(controllerBase))
 				return null;
 
 			var model = new ControllerModel().WithSymbol(symbol);
 
-			var controllerRoute = symbol.GetAttributes().FirstOrDefault(a => a.AttributeClass.Equals(WellKnownTypes.RouteAttribute(compilation)));
+			// Получаем RouteAttribute для контроллера
+			var controllerRoute = symbol.GetAttributes()
+				.FirstOrDefault(a => a.AttributeClass.Equals(WellKnownTypes.RouteAttribute(compilation)));
 			if (controllerRoute != null)
 			{
 				var prefix = controllerRoute.ConstructorArguments
@@ -73,18 +82,22 @@ namespace DotNext.StaticAnalysis.Controller
 
 			var actions = ImmutableArray<ControllerAction>.Empty.ToBuilder();
 
+			// Собираем информацию о controller actions
 			foreach (var method in symbol.GetMembers().OfType<IMethodSymbol>()
 				.Where(m => m.DeclaredAccessibility.HasFlag(Accessibility.Public)))
 			{
 				HttpMethod httpMethod = null;
 				string route = null;
 
+				// Собираем атрибуты action'а:
 				foreach (var attr in method.GetAttributes())
 				{
+					// 1. Http Method
 					if (attr.AttributeClass.Equals(WellKnownTypes.HttpGetAttribute(compilation)))
 						httpMethod = HttpMethod.Get;
 					else if (attr.AttributeClass.Equals(WellKnownTypes.HttpPostAttribute(compilation)))
 						httpMethod = HttpMethod.Post;
+					// 2. Route
 					else if (attr.AttributeClass.Equals(WellKnownTypes.RouteAttribute(compilation)))
 					{
 						route = attr.ConstructorArguments

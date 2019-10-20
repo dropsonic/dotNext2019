@@ -13,13 +13,17 @@ namespace DotNext.StaticAnalysis.Controller
 
 		public void Analyze(SymbolAnalysisContext context, ControllerModel model)
 		{
+			// Находим дубликаты
 			foreach (var group in model.Actions.GroupBy(a => (a.Method, a.Route)))
 			{
 				if (group.Count() > 1)
 				{
 					foreach (var action in group)
 					{
-						context.ReportDiagnostic(Diagnostic.Create(Descriptors.DN1002_DuplicateControllerAction, action.Symbol.Locations[0]));
+						context.ReportDiagnostic(
+							Diagnostic.Create(
+								Descriptors.DN1002_DuplicateControllerAction,
+								action.Symbol.Locations[0]));
 					}
 				}
 			}
