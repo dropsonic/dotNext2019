@@ -37,10 +37,13 @@ namespace DotNext.StaticAnalysis
 
 		private static readonly ConditionalWeakTable<AnalyzerOptions, SuppressionManager> _instances = 
 			new ConditionalWeakTable<AnalyzerOptions, SuppressionManager>();
-		private static readonly XmlSerializer _serializer = new XmlSerializer(typeof(Suppressions), new[] { typeof(Suppression) });
-		private static readonly Regex _commentRegex = new Regex(@"Rehecker disable once (DN\d{4})", RegexOptions.Compiled);
+		private static readonly XmlSerializer _serializer = 
+			new XmlSerializer(typeof(Suppressions), new[] { typeof(Suppression) });
+		private static readonly Regex _commentRegex = 
+			new Regex(@"Rehecker disable once (DN\d{4})", RegexOptions.Compiled);
 
-		private readonly ImmutableHashSet<Suppression> _suppressions = ImmutableHashSet<Suppression>.Empty;
+		private readonly ImmutableHashSet<Suppression> _suppressions = 
+			ImmutableHashSet<Suppression>.Empty;
 
 		private SuppressionManager(AnalyzerOptions analyzerOptions)
 		{
