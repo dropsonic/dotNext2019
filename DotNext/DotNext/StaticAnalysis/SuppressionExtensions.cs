@@ -21,5 +21,8 @@ namespace DotNext.StaticAnalysis
 			if (!SuppressionManager.Get(options).IsSuppressed(diagnostic))
 				reportDiagnostic(diagnostic);
 		}
+
+		// ...
+		// ещё несколько extension методов для других типов анализаторов
 	}
 }
