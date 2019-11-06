@@ -10,7 +10,7 @@ namespace DapperTest
         {
 	        using (IDbConnection connection = new SqlConnection("Data Source=(local);Initial Catalog=dapper;Integrated Security=True;"))
 	        {
-                connection.Query<User, Post, Post>()
+                connection.Query<User, Post, Post>(
 	        }
         }
     }

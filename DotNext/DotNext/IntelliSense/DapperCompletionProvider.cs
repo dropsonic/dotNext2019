@@ -18,23 +18,28 @@ namespace DotNext.IntelliSense
 	public class DapperCompletionProvider : CompletionProvider
 	{
 		// Даём понять системе, нужно ли использовать наш completion provider
-		public override bool ShouldTriggerCompletion(SourceText text, int position, CompletionTrigger trigger, OptionSet options)
+		public override bool ShouldTriggerCompletion(SourceText text, int position, 
+			CompletionTrigger trigger, OptionSet options)
 		{
-			return trigger.Kind == CompletionTriggerKind.Invoke || trigger.Kind == CompletionTriggerKind.Insertion;
+			return trigger.Kind == CompletionTriggerKind.Invoke 
+			       || trigger.Kind == CompletionTriggerKind.Insertion;
 		}
 
 		public override async Task ProvideCompletionsAsync(CompletionContext context)
 		{
 			var cancellationToken = context.CancellationToken;
 			// Получаем семантическую модель (она понадобится для работы с типами и методами)
-			var semanticModel = await context.Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+			var semanticModel = await context.Document
+				.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 			// Находим синтаксическую ноду, внутри который был вызван IntelliSense
-			var syntaxRoot = await context.Document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+			var syntaxRoot = await context.Document
+				.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 			var node = syntaxRoot.FindNode(context.CompletionListSpan);
 
 			// Проверяем, что мы внутри строкового литерала, который к тому же является аргументом вызова метода
-			if (!(node is ArgumentSyntax argNode) || !(argNode.Expression is LiteralExpressionSyntax literalNode) ||
-			    !(argNode.Parent.Parent is InvocationExpressionSyntax invNode))
+			if (!(node is ArgumentSyntax argNode) 
+			    || !(argNode.Expression is LiteralExpressionSyntax literalNode) 
+			    || !(argNode.Parent.Parent is InvocationExpressionSyntax invNode))
 				return;
 
 			// Получаем семантическую информацию о вызываемом методе
@@ -96,7 +101,9 @@ namespace DotNext.IntelliSense
 
 						foreach (var property in properties)
 						{
-							string propText = singleTable ? property.Name : $"{property.ContainingType.Name}.{property.Name}";
+							string propText = singleTable 
+								? property.Name 
+								: $"{property.ContainingType.Name}.{property.Name}";
 							context.AddItem(CompletionItem.Create(propText, sortText: $"P {propText}")
 								.AddTag(WellKnownTags.Property)
 								// Добавляем XML-комментарий от свойства DTO-класса как метаинформацию
@@ -125,10 +132,12 @@ namespace DotNext.IntelliSense
 		}
 
 		// Метод, определяющий, какой текст подсказки (hint) показывать для пункта IntelliSense
-		public override Task<CompletionDescription> GetDescriptionAsync(Document document, CompletionItem item, CancellationToken cancellationToken)
+		public override Task<CompletionDescription> GetDescriptionAsync(
+			Document document, CompletionItem item, CancellationToken cancellationToken)
 		{
 			// Добываем ранее записанный в метаинформацию XML-комментарий
-			if (item.Properties.TryGetValue("comment", out string comment) && !String.IsNullOrWhiteSpace(comment))
+			if (item.Properties.TryGetValue("comment", out string comment) 
+			    && !String.IsNullOrWhiteSpace(comment))
 			{
 				// Достаём содержимое тега <summary> и возвращаем его как подсказку
 				string summary = XDocument.Parse(comment).Descendants("summary").FirstOrDefault()?.Value;
@@ -140,14 +149,19 @@ namespace DotNext.IntelliSense
 		}
 
 		// Точка расширения для замены подставляемого при completion текста
-		public override Task<CompletionChange> GetChangeAsync(Document document, CompletionItem item, char? commitKey, CancellationToken cancellationToken)
+		public override Task<CompletionChange> GetChangeAsync(
+			Document document, CompletionItem item, char? commitKey, CancellationToken cancellationToken)
 		{
 			// Если это свойство DTO-класса, то экранируем его квадратными скобками (escaping)
 			if (item.Tags.Contains(WellKnownTags.Property))
 			{
 				string[] splitted = item.DisplayText.Split('.');
-				string newText = splitted.Length > 1 ? $"[{splitted[0]}].[{splitted[1]}]" : $"[{splitted[0]}]";
-				return Task.FromResult(CompletionChange.Create(new TextChange(item.Span, newText)));
+				string newText = splitted.Length > 1 
+					? $"[{splitted[0]}].[{splitted[1]}]" 
+					: $"[{splitted[0]}]";
+
+				return Task.FromResult(
+					CompletionChange.Create(new TextChange(item.Span, newText)));
 			}
 
 			return base.GetChangeAsync(document, item, commitKey, cancellationToken);

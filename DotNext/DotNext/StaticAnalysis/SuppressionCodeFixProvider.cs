@@ -69,7 +69,8 @@ namespace DotNext.StaticAnalysis
 				// Если файла нет, то создаём его
 				if (suppressionDoc == null)
 				{
-					// Есть открытый баг от 2015 года, что Roslyn не проставляет Build Action = AdditionalFiles
+					// Есть открытый баг от 2015 года, что Roslyn
+					// не проставляет Build Action = AdditionalFiles
 					// https://github.com/dotnet/roslyn/issues/4655
 					solution = project.Solution.AddAdditionalDocument(
 						DocumentId.CreateNewId(project.Id, debugName: "Suppression File"),

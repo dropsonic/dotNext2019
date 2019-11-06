@@ -10,27 +10,127 @@ namespace DotNext.StaticAnalysis
 {
 	public abstract class NestedInvocationWalker : CSharpSyntaxWalker
 	{
+		#region Fields & service methods
+
 		private const int MaxDepth = 100; // для борьбы с circular dependencies
+		private bool RecursiveAnalysisEnabled() => _nodesStack.Count <= MaxDepth;
 		private readonly Compilation _compilation;
 		private readonly Dictionary<SyntaxTree, SemanticModel> _semanticModels = new Dictionary<SyntaxTree, SemanticModel>();
 		private readonly ISet<(SyntaxNode, DiagnosticDescriptor)> _reportedDiagnostics = new HashSet<(SyntaxNode, DiagnosticDescriptor)>();
 		private readonly Stack<SyntaxNode> _nodesStack = new Stack<SyntaxNode>();
 		private readonly HashSet<IMethodSymbol> _methodsInStack = new HashSet<IMethodSymbol>();
+		private bool IsMethodInStack(IMethodSymbol symbol) => _methodsInStack.Contains(symbol);
 
         protected CancellationToken CancellationToken { get; }
+		protected void ThrowIfCancellationRequested() => CancellationToken.ThrowIfCancellationRequested();
 		
+		#endregion
+
         // Синтаксическая нода в оригинальном дереве, с которого начался анализ.
         // Обычно это нода, на которой и нужно показывать диагностику.
         protected SyntaxNode OriginalNode { get; private set; }
 
-		
 		protected NestedInvocationWalker(Compilation compilation, CancellationToken cancellationToken)
 		{
 			_compilation = compilation;
             CancellationToken = cancellationToken;
 		}
 
-		protected void ThrowIfCancellationRequested() => CancellationToken.ThrowIfCancellationRequested();
+		#region Visit
+
+		// Вызов метода
+		public override void VisitInvocationExpression(InvocationExpressionSyntax node)
+		{
+			ThrowIfCancellationRequested();
+
+			if (RecursiveAnalysisEnabled() && node.Parent?.Kind() != SyntaxKind.ConditionalAccessExpression)
+			{
+				var methodSymbol = GetSymbol<IMethodSymbol>(node);
+				VisitMethodSymbol(methodSymbol, node);
+			}
+
+			base.VisitInvocationExpression(node);
+		}
+
+		// Обращение к property (getter)
+		public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+		{
+			ThrowIfCancellationRequested();
+
+			if (RecursiveAnalysisEnabled() && node.Parent != null
+				&& !node.Parent.IsKind(SyntaxKind.ObjectInitializerExpression)
+			    && !(node.Parent is AssignmentExpressionSyntax))
+			{
+				var propertySymbol = GetSymbol<IPropertySymbol>(node);
+				VisitMethodSymbol(propertySymbol?.GetMethod, node);
+			}
+
+			base.VisitMemberAccessExpression(node);
+		}
+
+		// Присвоение property (setter)
+		public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
+		{
+			ThrowIfCancellationRequested();
+
+			if (RecursiveAnalysisEnabled())
+			{
+				var propertySymbol = GetSymbol<IPropertySymbol>(node.Left);
+				VisitMethodSymbol(propertySymbol?.SetMethod, node);
+			}
+
+			base.VisitAssignmentExpression(node);
+		}
+
+		// Конструктор
+		public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
+		{
+			ThrowIfCancellationRequested();
+
+			if (RecursiveAnalysisEnabled())
+			{
+				var methodSymbol = GetSymbol<IMethodSymbol>(node);
+				VisitMethodSymbol(methodSymbol, node);
+			}
+
+			base.VisitObjectCreationExpression(node);
+		}
+
+		// Обращение к property или вызов метода через ?.
+		public override void VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
+		{
+			ThrowIfCancellationRequested();
+
+			if (RecursiveAnalysisEnabled() && node.WhenNotNull != null)
+			{
+				var propertySymbol = GetSymbol<IPropertySymbol>(node.WhenNotNull);
+				var methodSymbol = propertySymbol != null 
+					? propertySymbol.GetMethod 
+					: GetSymbol<IMethodSymbol>(node.WhenNotNull);
+
+				VisitMethodSymbol(methodSymbol, node);
+			}
+
+			base.VisitConditionalAccessExpression(node);
+		}
+
+		// Не заходим в лямбды
+        public override void VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node) { }
+        public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node) { }
+		public override void VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node) { }
+
+        #endregion
+
+		private void VisitMethodSymbol(IMethodSymbol symbol, SyntaxNode originalNode)
+		{
+			if (symbol?.GetSyntax(CancellationToken) is CSharpSyntaxNode methodNode &&
+			    !IsMethodInStack(symbol))
+			{
+				Push(originalNode, symbol);
+				methodNode.Accept(this);
+				Pop(symbol);
+			}
+		}
 
 		// Возвращает семантическую информацию (symbol) для expression
 		// (например, вызова метода)
@@ -44,19 +144,16 @@ namespace DotNext.StaticAnalysis
 				var symbolInfo = semanticModel.GetSymbolInfo(node, CancellationToken);
 
 				if (symbolInfo.Symbol is T symbol)
-				{
 					return symbol;
-				}
 
 				if (!symbolInfo.CandidateSymbols.IsEmpty)
-				{
 					return symbolInfo.CandidateSymbols.OfType<T>().FirstOrDefault();
-				}
 			}
 
 			return null;
 		}
 
+		// Получаем / кэшируем семантическую модель для документа
 		protected virtual SemanticModel GetSemanticModel(SyntaxTree syntaxTree)
 		{
 			if (!_compilation.ContainsSyntaxTree(syntaxTree))
@@ -101,113 +198,5 @@ namespace DotNext.StaticAnalysis
 			if (_nodesStack.Count == 0)
 				OriginalNode = null;
 		}
-
-		private bool RecursiveAnalysisEnabled()
-		{
-			return _nodesStack.Count <= MaxDepth;
-		}
-
-		#region Visit
-
-		public override void VisitInvocationExpression(InvocationExpressionSyntax node)
-		{
-			ThrowIfCancellationRequested();
-
-			if (RecursiveAnalysisEnabled() && node.Parent?.Kind() != SyntaxKind.ConditionalAccessExpression)
-			{
-				var methodSymbol = GetSymbol<IMethodSymbol>(node);
-				VisitMethodSymbol(methodSymbol, node);
-			}
-
-			base.VisitInvocationExpression(node);
-		}
-
-		public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
-		{
-			ThrowIfCancellationRequested();
-
-			if (RecursiveAnalysisEnabled() && node.Parent != null
-				&& !node.Parent.IsKind(SyntaxKind.ObjectInitializerExpression)
-			    && !(node.Parent is AssignmentExpressionSyntax))
-			{
-				var propertySymbol = GetSymbol<IPropertySymbol>(node);
-				VisitMethodSymbol(propertySymbol?.GetMethod, node);
-			}
-
-			base.VisitMemberAccessExpression(node);
-		}
-
-		public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
-		{
-			ThrowIfCancellationRequested();
-
-			if (RecursiveAnalysisEnabled())
-			{
-				var propertySymbol = GetSymbol<IPropertySymbol>(node.Left);
-				VisitMethodSymbol(propertySymbol?.SetMethod, node);
-			}
-
-			base.VisitAssignmentExpression(node);
-		}
-
-		public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
-		{
-			ThrowIfCancellationRequested();
-
-			if (RecursiveAnalysisEnabled())
-			{
-				var methodSymbol = GetSymbol<IMethodSymbol>(node);
-				VisitMethodSymbol(methodSymbol, node);
-			}
-
-			base.VisitObjectCreationExpression(node);
-		}
-
-		public override void VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
-		{
-			ThrowIfCancellationRequested();
-
-			if (RecursiveAnalysisEnabled() && node.WhenNotNull != null)
-			{
-				var propertySymbol = GetSymbol<IPropertySymbol>(node.WhenNotNull);
-				var methodSymbol = propertySymbol != null 
-					? propertySymbol.GetMethod 
-					: GetSymbol<IMethodSymbol>(node.WhenNotNull);
-
-				VisitMethodSymbol(methodSymbol, node);
-			}
-
-			base.VisitConditionalAccessExpression(node);
-		}
-
-        public override void VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
-        {
-        }
-
-        public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
-        {
-        }
-
-		public override void VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)
-		{
-		}
-
-		private void VisitMethodSymbol(IMethodSymbol symbol, SyntaxNode originalNode)
-		{
-			if (symbol?.GetSyntax(CancellationToken) is CSharpSyntaxNode methodNode &&
-                !IsMethodInStack(symbol))
-			{
-				Push(originalNode, symbol);
-				methodNode.Accept(this);
-				Pop(symbol);
-			}
-		}
-
-        private bool IsMethodInStack(IMethodSymbol symbol)
-        {
-            return _methodsInStack.Contains(symbol);
-        }
-
-        #endregion
     }
 }
