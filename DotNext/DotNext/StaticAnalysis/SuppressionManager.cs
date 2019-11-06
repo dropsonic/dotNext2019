@@ -35,8 +35,6 @@ namespace DotNext.StaticAnalysis
 		public const string SuppressionFileExtension = ".suppression";
 		public const string SuppressionCommentFormat = "// Rehecker disable once {0}";
 
-		private static readonly ConditionalWeakTable<AnalyzerOptions, SuppressionManager> _instances = 
-			new ConditionalWeakTable<AnalyzerOptions, SuppressionManager>();
 		private static readonly XmlSerializer _serializer = 
 			new XmlSerializer(typeof(Suppressions), new[] { typeof(Suppression) });
 		private static readonly Regex _commentRegex = 
@@ -62,6 +60,11 @@ namespace DotNext.StaticAnalysis
 		{
 			_suppressions = suppressions;
 		}
+
+		
+		// System.Runtime.CompilerServices
+		private static readonly ConditionalWeakTable<AnalyzerOptions, SuppressionManager> _instances = 
+			new ConditionalWeakTable<AnalyzerOptions, SuppressionManager>();
 
 		// Возвращаем существующий SuppressionManager из кэша или создаём новый
 		public static SuppressionManager Get(AnalyzerOptions options)
